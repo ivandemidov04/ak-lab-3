@@ -57,7 +57,10 @@ class DataPath:
             case Opcode.DEC:
                 return self.alu_out - 1
             case Opcode.CMP:
-                self.flags = {"z": self.alu_out == value, "n": self.alu_out < value}
+                if isinstance(self.alu_out, int) and isinstance(value, int):
+                    self.flags = {"z": self.alu_out == value, "n": self.alu_out < value}
+                else:
+                    self.flags = {"z": self.alu_out == value, "n": False}
                 return self.alu_out
 
     def get_bus_value(self, bus):

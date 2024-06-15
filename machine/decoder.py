@@ -63,18 +63,32 @@ class Decoder:
         if self.opcode not in [Opcode.INC, Opcode.DEC]:
             if isinstance(self.arg, str) and self.arg[0] == '#':
                 self.arg = self.arg[1:]
-                dp.alu_working(Opcode.ADD, [Operands.ACC])####
-                dp.signal_latch_regs(Signal.BUF_LATCH)
-                self.cu.tick()
+                if isinstance(self.arg, int):
+                    dp.alu_working(Opcode.ADD, [Operands.ACC])####
+                    dp.signal_latch_regs(Signal.BUF_LATCH)
+                    self.cu.tick()
 
-                dp.signal_latch_acc(Signal.DIRECT_ACC_LOAD, self.arg)
-                dp.alu_working(self.opcode, [Operands.BUF, Operands.ACC])
-                if self.opcode != Opcode.CMP:
-                    dp.signal_latch_acc(Signal.DATA_ACC_LOAD)
+                    dp.signal_latch_acc(Signal.DIRECT_ACC_LOAD, self.arg)
+                    dp.alu_working(self.opcode, [Operands.BUF, Operands.ACC])
+                    if self.opcode != Opcode.CMP:
+                        dp.signal_latch_acc(Signal.DATA_ACC_LOAD)
+                    else:
+                        dp.alu_working(Opcode.ADD, [Operands.BUF])
+                        dp.signal_latch_acc(Signal.DATA_ACC_LOAD)
+                    self.cu.tick()
                 else:
-                    dp.alu_working(Opcode.ADD, [Operands.BUF])
-                    dp.signal_latch_acc(Signal.DATA_ACC_LOAD)
-                self.cu.tick()
+                    dp.alu_working(Opcode.ADD, [Operands.ACC])#####################################################
+                    dp.signal_latch_regs(Signal.BUF_LATCH)
+                    self.cu.tick()
+
+                    dp.signal_latch_acc(Signal.DIRECT_ACC_LOAD, self.arg)
+                    dp.alu_working(self.opcode, [Operands.BUF, Operands.ACC])
+                    if self.opcode != Opcode.CMP:
+                        dp.signal_latch_acc(Signal.DATA_ACC_LOAD)
+                    else:
+                        dp.alu_working(Opcode.ADD, [Operands.BUF])
+                        dp.signal_latch_acc(Signal.DATA_ACC_LOAD)
+                    self.cu.tick()
             else:
                 self.process_addressing()
                 dp.memory_manager(Signal.READ)
