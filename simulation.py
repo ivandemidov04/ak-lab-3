@@ -15,24 +15,15 @@ def start(first_instr, code, data, input_tokens):
     return result_string
 
 def get_tokens(input_file):
-    return ""
-    # with open(input_file, "r", encoding="utf-8") as f:
-    #     input_string = f.readline()
-    #
-    # input_tokens = []
-    # match os.path.basename(input_file):
-    #     case "hello_user_name.txt":
-    #         time = 221
-    #         offset = 40
-    #     case _:
-    #         time = 21
-    #         offset = 40
-    #
-    # for char in input_string:
-    #     input_tokens.append((time, char))
-    #     time += offset
-    # input_tokens.append((time, '\0'))
-    # return input_tokens
+    with open(input_file, "r", encoding="utf-8") as f:
+        input_string = f.readline()
+
+    input_tokens = []
+
+    for char in input_string:
+        input_tokens.append(char)
+    input_tokens.append('\u0000')
+    return input_tokens
 
 def main(code_file, input_file):
     input_tokens = get_tokens(input_file)

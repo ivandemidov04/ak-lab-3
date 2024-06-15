@@ -23,9 +23,9 @@ class DataPath:
 
     def signal_latch_address(self, sel, load=0):
         if sel == Signal.DIRECT_ADDRESS_LOAD:
-            self.address_reg = load
+            self.address_reg = int(load)
         else:
-            self.address_reg = self.alu_out
+            self.address_reg = int(self.alu_out)
 
     def memory_manager(self, operation):
         if operation == Signal.READ:
@@ -77,7 +77,7 @@ class DataPath:
             self.alu_out = self.execute_alu_operation(operation)
         elif len(valves) > 1:
             self.alu_out = self.execute_alu_operation(operation, self.get_bus_value(valves[1]))
-        if operation != Opcode.CMP:
+        if operation != Opcode.CMP and isinstance(self.alu_out, int):
             self.flags = {"z": self.alu_out == 0, "n": self.alu_out < 0}
 
 
@@ -85,7 +85,7 @@ class ControlUnit:
 
     def __init__(self, first_instr, instructions, data_path, input_tokens):
         self.ip = first_instr
-
+        self.input_tokens = input_tokens
         self.instructions = instructions
         self.instr = self.instructions[0]
         self.data_path = data_path
@@ -116,8 +116,6 @@ class ControlUnit:
             self.instr_counter += 1
             decode = Decoder(self, self.instr[0], self.instr[1] if self.instr[0] not in [Opcode.HALT, Opcode.INC, Opcode.DEC, Opcode.PUSH, Opcode.POP, Opcode.RET] else 0)
             signal = Signal.NEXT_IP
-            # if not self.data_path.ports.slave.input_tokens:
-            #     pass
 
             if decode.opcode in [Opcode.LOAD, Opcode.STORE]:
                 decode.decode_memory_commands()

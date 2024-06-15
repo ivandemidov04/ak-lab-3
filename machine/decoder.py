@@ -19,6 +19,7 @@ class Decoder:
             dp.signal_latch_address(Signal.DIRECT_ADDRESS_LOAD, self.arg)
             self.cu.tick()
 
+            # print(dp.address_reg)
             dp.memory_manager(Signal.READ)
             dp.alu_working(Opcode.INC, [Operands.MEM])
             dp.signal_latch_regs(Signal.BUF_LATCH)
@@ -166,6 +167,13 @@ class Decoder:
             self.cu.tick()
 
     def decode_io_commands(self):
+        dp = self.cu.data_path
+        if self.opcode == Opcode.IN:
+            print("nth")
+        else:
+            dp.alu_working(Opcode.ADD, [Operands.ACC])
+            print(dp.alu_out)
+            self.cu.tick()
         # dp = self.cu.data_path
         # dp.ports.tick = self.cu.get_ticks()
         # if self.opcode in [Opcode.IN, Opcode.OUT]:
