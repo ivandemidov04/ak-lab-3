@@ -60,6 +60,9 @@ class DataPath:
                 if isinstance(self.alu_out, int) and isinstance(value, int):
                     self.flags = {"z": self.alu_out == value, "n": self.alu_out < value}
                 else:
+                    if value[0] == "'":
+                        value = value[2:-1]
+                    # print("* " + self.alu_out + " " + value + "\n")
                     self.flags = {"z": self.alu_out == value, "n": False}
                 return self.alu_out
 
