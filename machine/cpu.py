@@ -50,22 +50,15 @@ class DataPath:
             case Opcode.DIV:
                 return self.alu_out // value
             case Opcode.MOD:
-                # self.flags = {"z": True if self.alu_out % int(value) == 0 else False, "n": True if self.alu_out % int(value) > 0 else False}
                 return self.alu_out % int(value)
             case Opcode.INC:
                 return self.alu_out + 1
             case Opcode.DEC:
                 return self.alu_out - 1
             case Opcode.CMP:
-                if isinstance(self.alu_out, int) and isinstance(value, int):
-                    self.flags = {"z": self.alu_out == value, "n": self.alu_out < value}
-                else:
-                    if value[0] == "'":
-                        value = value[2:-1]
-                        # value = ""
-                    # print("* " + self.alu_out + " " + str(value) + "\n")
-                    # print("+ " + str(type(self.alu_out)) + " " + str(type(value)) + "\n")
-                    self.flags = {"z": self.alu_out == value or self.alu_out == "", "n": False}
+                self.flags = {"z": self.alu_out == value or self.alu_out == "",
+                              "n": self.alu_out < value
+                              if isinstance(self.alu_out, int) and isinstance(value, int) else False}
                 return self.alu_out
 
     def get_bus_value(self, bus):
@@ -111,23 +104,27 @@ class ControlUnit:
         if self._tick > 10000:
             exit(0)
 
-        with open("processor.txt", 'a') as f:
-            f.write("TICK: " + str(self._tick) + " | INSTR: " + str(self.instr_counter) + " " + str(self.instr)
-                    + " | ACC: " + str(self.data_path.acc) + " | BUF_REG: " + str(self.data_path.buf_reg)
-                    + " | SP: " + str(self.data_path.stack_pointer) + " | ADDR: " + str(self.data_path.address_reg)
-                    + " | IP: " + str(self.ip) + " | FLAGS: " + str(self.data_path.flags) + "\n")
-            f.write(str(self.data_path.data_memory) + "\n")
+        # with open("processor.txt", 'a') as f:
+        #     f.write("TICK: " + str(self._tick) + " | INSTR: " + str(self.instr_counter) + " " + str(self.instr)
+        #             + " | ACC: " + str(self.data_path.acc) + " | BUF_REG: " + str(self.data_path.buf_reg)
+        #             + " | SP: " + str(self.data_path.stack_pointer) + " | ADDR: " + str(self.data_path.address_reg)
+        #             + " | IP: " + str(self.ip) + " | FLAGS: " + str(self.data_path.flags) + "\n")
+        #     f.write(str(self.data_path.data_memory) + "\n")
 
     def execute(self):
         while self.instructions[self.ip][0] != Opcode.HALT:
             self.instr = self.instructions[self.ip]
             self.instr_counter += 1
-            decode = Decoder(self, self.instr[0], self.instr[1] if self.instr[0] not in [Opcode.HALT, Opcode.INC, Opcode.DEC, Opcode.PUSH, Opcode.POP, Opcode.RET] else 0)
+            if self.instr[0] not in [Opcode.HALT, Opcode.INC, Opcode.DEC, Opcode.PUSH, Opcode.POP, Opcode.RET]:
+                decode = Decoder(self, self.instr[0], self.instr[1])
+            else:
+                decode = Decoder(self, self.instr[0], 0)
             signal = Signal.NEXT_IP
 
             if decode.opcode in [Opcode.LOAD, Opcode.STORE]:
                 decode.decode_memory_commands()
-            elif decode.opcode in [Opcode.ADD, Opcode.SUB, Opcode.MUL, Opcode.DIV, Opcode.MOD, Opcode.INC, Opcode.DEC, Opcode.CMP]:
+            elif (decode.opcode in
+                  [Opcode.ADD, Opcode.SUB, Opcode.MUL, Opcode.DIV, Opcode.MOD, Opcode.INC, Opcode.DEC, Opcode.CMP]):
                 decode.decode_arithmetic_commands()
             elif decode.opcode in [Opcode.JMP, Opcode.JGE, Opcode.JZ, Opcode.JNZ]:
                 signal = decode.decode_flow_commands()
@@ -140,9 +137,14 @@ class ControlUnit:
 
             if self.instr[0] != Opcode.CALL:
                 self.signal_latch_ip(signal, decode.arg)
-        # self.instr = self.instructions[self.ip]
 
-        # return "".join(self.data_path.ports.slave.output_buffer), self.instr_counter, self._tick
+            with open("processor.txt", 'a') as f:
+                f.write("TICK: " + str(self._tick) + " | INSTR: " + str(self.instr_counter) + " " + str(self.instr)
+                        + " | ACC: " + str(self.data_path.acc) + " | BUF_REG: " + str(self.data_path.buf_reg)
+                        + " | SP: " + str(self.data_path.stack_pointer) + " | ADDR: " + str(self.data_path.address_reg)
+                        + " | IP: " + str(self.ip) + " | FLAGS: " + str(self.data_path.flags) + "\n")
+                # f.write(str(self.data_path.data_memory) + "\n")
+
         return str(self.instr_counter) + " " + str(self._tick)
 
     def signal_latch_ip(self, signal=Signal.NEXT_IP, arg=0):

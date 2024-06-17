@@ -19,7 +19,6 @@ class Decoder:
             dp.signal_latch_address(Signal.DIRECT_ADDRESS_LOAD, self.arg)
             self.cu.tick()
 
-            # print(dp.address_reg)
             dp.memory_manager(Signal.READ)
             dp.alu_working(Opcode.INC, [Operands.MEM])
             dp.signal_latch_regs(Signal.BUF_LATCH)
@@ -64,7 +63,7 @@ class Decoder:
             if isinstance(self.arg, str) and self.arg[0] == '#':
                 self.arg = self.arg[1:]
                 if isinstance(self.arg, int):
-                    dp.alu_working(Opcode.ADD, [Operands.ACC])####
+                    dp.alu_working(Opcode.ADD, [Operands.ACC])
                     dp.signal_latch_regs(Signal.BUF_LATCH)
                     self.cu.tick()
 
@@ -77,7 +76,7 @@ class Decoder:
                         dp.signal_latch_acc(Signal.DATA_ACC_LOAD)
                     self.cu.tick()
                 else:
-                    dp.alu_working(Opcode.ADD, [Operands.ACC])#####################################################
+                    dp.alu_working(Opcode.ADD, [Operands.ACC])
                     dp.signal_latch_regs(Signal.BUF_LATCH)
                     self.cu.tick()
 
