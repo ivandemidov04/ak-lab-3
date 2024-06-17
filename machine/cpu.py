@@ -62,8 +62,10 @@ class DataPath:
                 else:
                     if value[0] == "'":
                         value = value[2:-1]
-                    # print("* " + self.alu_out + " " + value + "\n")
-                    self.flags = {"z": self.alu_out == value, "n": False}
+                        # value = ""
+                    # print("* " + self.alu_out + " " + str(value) + "\n")
+                    # print("+ " + str(type(self.alu_out)) + " " + str(type(value)) + "\n")
+                    self.flags = {"z": self.alu_out == value or self.alu_out == "", "n": False}
                 return self.alu_out
 
     def get_bus_value(self, bus):

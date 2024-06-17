@@ -183,15 +183,14 @@ class Decoder:
     def decode_io_commands(self):
         dp = self.cu.data_path
         if self.opcode == Opcode.IN:
-            print("nth")
+            dp.signal_latch_acc(Signal.DIRECT_ACC_LOAD, self.cu.input_tokens[0])
+            del self.cu.input_tokens[0]
+            self.cu.tick()
         else:
             dp.alu_working(Opcode.ADD, [Operands.ACC])
-            print(dp.alu_out)
+            if dp.alu_out != "":
+                print(dp.alu_out, end="")
+            else:
+                print(dp.alu_out)
             self.cu.tick()
-        # dp = self.cu.data_path
-        # dp.ports.tick = self.cu.get_ticks()
-        # if self.opcode in [Opcode.IN, Opcode.OUT]:
-        #     dp.ports.io_buffer_manager(self.opcode, self.arg)
-        # else:
-        #     dp.ports.inverse_signal(self.arg)
         self.cu.tick()

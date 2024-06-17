@@ -22,7 +22,7 @@ def get_tokens(input_file):
 
     for char in input_string:
         input_tokens.append(char)
-    input_tokens.append('\u0000')
+    input_tokens.append("")
     return input_tokens
 
 def main(code_file, input_file):

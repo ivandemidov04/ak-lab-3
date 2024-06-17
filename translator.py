@@ -58,13 +58,13 @@ def work_with_labels(instr, data):
             for j in range(1, len(line)-1):
                 letter = line[j]
                 tmp_data.append('\'' + letter + '\'')
-            tmp_data.append('\0')
+            tmp_data.append(None)
     data = tmp_data
 
     cnt = 0
     for i in range(len(data)):
         line = data[i]
-        if ":" in line:
+        if line is not None and ":" in line:
             index = line.index(':')
             label = line[0:index]
             label_data[label] = cnt
