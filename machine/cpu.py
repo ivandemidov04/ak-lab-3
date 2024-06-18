@@ -1,8 +1,7 @@
-import sys
-
 from machine.decoder import Decoder
-from machine.machine_signals import Signal, Operands
 from machine.isa import Opcode
+from machine.machine_signals import Signal, Operands
+import sys
 
 class DataPath:
 
@@ -61,6 +60,7 @@ class DataPath:
                           "n": self.alu_out < value
                           if isinstance(self.alu_out, int) and isinstance(value, int) else False}
             return self.alu_out
+        return None
 
     def get_bus_value(self, bus):
         if bus == Operands.ACC:
@@ -104,13 +104,6 @@ class ControlUnit:
         if self._tick > 10000:
             exit(0)
 
-        # with open("processor.txt", 'a') as f:
-        #     f.write("TICK: " + str(self._tick) + " | INSTR: " + str(self.instr_counter) + " " + str(self.instr)
-        #             + " | ACC: " + str(self.data_path.acc) + " | BUF_REG: " + str(self.data_path.buf_reg)
-        #             + " | SP: " + str(self.data_path.stack_pointer) + " | ADDR: " + str(self.data_path.address_reg)
-        #             + " | IP: " + str(self.ip) + " | FLAGS: " + str(self.data_path.flags) + "\n")
-        #     f.write(str(self.data_path.data_memory) + "\n")
-
     def execute(self):
         while self.instructions[self.ip][0] != Opcode.HALT:
             self.instr = self.instructions[self.ip]
@@ -138,12 +131,6 @@ class ControlUnit:
             if self.instr[0] != Opcode.CALL:
                 self.signal_latch_ip(signal, decode.arg)
 
-            # with open("processor.txt", 'a') as f:
-            #     f.write("TICK: " + str(self._tick) + " | INSTR: " + str(self.instr_counter) + " " + str(self.instr)
-            #             + " | ACC: " + str(self.data_path.acc) + " | BUF_REG: " + str(self.data_path.buf_reg)
-            #             + " | SP: " + str(self.data_path.stack_pointer) + " | ADDR: " + str(self.data_path.address_reg)
-            #             + " | IP: " + str(self.ip) + " | FLAGS: " + str(self.data_path.flags) + "\n")
-                # f.write(str(self.data_path.data_memory) + "\n")
             print("TICK: " + str(self._tick) + " | INSTR: " + str(self.instr_counter) + " " + str(self.instr)
                         + " | ACC: " + str(self.data_path.acc) + " | BUF_REG: " + str(self.data_path.buf_reg)
                         + " | SP: " + str(self.data_path.stack_pointer) + " | ADDR: " + str(self.data_path.address_reg)

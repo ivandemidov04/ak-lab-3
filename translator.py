@@ -1,7 +1,6 @@
+from machine.isa import Opcode
 import json
 import sys
-
-from machine.isa import Opcode
 
 commands_with_labels = [Opcode.JMP, Opcode.JGE, Opcode.JZ, Opcode.JNZ, Opcode.CALL]
 
@@ -11,7 +10,7 @@ def divide_and_delete_comments(code):
     for i in range(0, len(code)):
         line = code[i]
         if ";" in line:
-            index = line.index(';')
+            index = line.index(";")
             line = line[0:index]
         line = line.strip()
 
@@ -57,7 +56,7 @@ def work_with_labels(instr, data):
         else:
             for j in range(1, len(line)-1):
                 letter = line[j]
-                tmp_data.append('\'' + letter + '\'')
+                tmp_data.append("\'" + letter + "\'")
             tmp_data.append(None)
     data = tmp_data
 
@@ -65,7 +64,7 @@ def work_with_labels(instr, data):
     for i in range(len(data)):
         line = data[i]
         if line is not None and ":" in line:
-            index = line.index(':')
+            index = line.index(":")
             label = line[0:index]
             label_data[label] = cnt
         else:
@@ -87,16 +86,15 @@ def write_instr(target, instr, data, label_instr, label_data):
                 res = words[1]
                 if words[0] == Opcode.IN or words[0] == Opcode.OUT:
                     res = int(res)
-                elif res[0] == '#':
+                elif res[0] == "#":
                     res = res
-                    # res = int(res[1:])
-                elif res[0] == '*':
-                    if res[len(res) - 1] == '+':
+                elif res[0] == "*":
+                    if res[len(res) - 1] == "+":
                         ind = label_data[res[1:len(res) - 1]]
-                        res = '*' + data[ind] + '+'
+                        res = "*" + data[ind] + "+"
                     else:
                         ind = label_data[res[1:]]
-                        res = '*' + data[ind]
+                        res = "*" + data[ind]
                 else:
                     if words[0] in commands_with_labels:
                         res = int(label_instr.get(res))

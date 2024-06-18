@@ -1,16 +1,9 @@
-import os
-import sys
-
 from machine.cpu import DataPath, ControlUnit
+import sys
 
 def start(first_instr, code, data, input_tokens):
     dp = DataPath(data, [1, 2])
     cu = ControlUnit(first_instr, code, dp, input_tokens)
-    # print(first_instr)
-    # print(code)
-    # print(data)
-    # print(input_tokens)
-    # return ""
     result_string = cu.execute()
     return result_string
 
@@ -36,21 +29,21 @@ def main(code_file, input_file):
         for i in range(len(lines)-53, len(lines)-1):
             data_for_json.append(lines[i])
 
-    ind = code_for_json[0].index(':')
+    ind = code_for_json[0].index(":")
     first_instr = int(code_for_json[0][ind+2:len(code_for_json[0])-3])
     del code_for_json[0]
 
     code = []
     for i in range(len(code_for_json)):
         line = code_for_json[i]
-        ind = line.find('opcode')
+        ind = line.find("opcode")
         line = line[ind+10:len(line)-3]
-        ind = line.find('\"')
+        ind = line.find("\"")
         tmp = []
         tmp.append(line[:ind])
         line = line[ind+1:]
         if len(line) > 0:
-            ind = line.find('arg')
+            ind = line.find("arg")
             line = line[ind+6:len(line)]
             if len(line) >= 3 and line[0] == "\"":
                 line = line[1:len(line)-1]
@@ -62,7 +55,7 @@ def main(code_file, input_file):
     data = []
     for i in range(len(data_for_json)):
         line = data_for_json[i]
-        ind = line.find('data')
+        ind = line.find("data")
         line = line[ind+8:len(line)-4]
         if line.isnumeric():
             line = int(line)
@@ -77,7 +70,7 @@ def main(code_file, input_file):
 if __name__ == "__main__":
     assert len(sys.argv) == 3, "Wrong arguments: simulation.py <code_file> <input_file>"
     _, code_file, input_file = sys.argv
-    with open("processor.txt", 'w') as f:
+    with open("processor.txt", "w") as f:
         f.write('')
 
     main(code_file, input_file)

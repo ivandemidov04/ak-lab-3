@@ -1,11 +1,10 @@
-import pytest
-import tempfile
-import os
 import contextlib
 import io
-
-import translator
+import os
+import pytest
 import simulation
+import tempfile
+import translator
 
 
 @pytest.mark.golden_test("golden/*.yml")
@@ -14,9 +13,6 @@ def test_translator_and_machine(golden):
         source = os.path.join(tmpdirname, "source.asm")
         input_stream = os.path.join(tmpdirname, "input.txt")
         target = os.path.join(tmpdirname, "target.txt")
-        # debug_log = golden.get("debug_log", True)
-        # log = os.path.join(tmpdirname, "processor.txt")
-        # debug_log = golden.get("debug_log", True)
 
         with open(source, "w", encoding="utf-8") as file:
             file.write(golden["source"])
@@ -34,5 +30,3 @@ def test_translator_and_machine(golden):
         assert code == golden.out["machine_code"]
         assert stdout.getvalue() == golden.out["output"]
         assert stderr.getvalue() == golden.out["log"]
-        # assert log == golden.out["processor.log"]
-        # assert stderr.getvalue() == golden.out["out_log"]
