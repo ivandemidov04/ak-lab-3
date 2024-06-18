@@ -1,5 +1,6 @@
 from machine.isa import Opcode
-from machine.machine_signals import Signal, Operands
+from machine.machine_signals import Operands, Signal
+
 
 class Decoder:
 
@@ -13,7 +14,7 @@ class Decoder:
         if isinstance(self.arg, int):
             dp.signal_latch_address(Signal.DIRECT_ADDRESS_LOAD, self.arg)
             self.cu.tick()
-        elif self.arg[-1] == '+':
+        elif self.arg[-1] == "+":
             self.arg = self.arg[1:-1]
             dp.signal_latch_address(Signal.DIRECT_ADDRESS_LOAD, self.arg)
             self.cu.tick()
@@ -27,7 +28,7 @@ class Decoder:
             dp.alu_working(Opcode.DEC, [Operands.BUF])
             dp.signal_latch_address(Signal.DATA_ADDRESS_LOAD)
             self.cu.tick()
-        elif self.arg[0] == '*':
+        elif self.arg[0] == "*":
             self.arg = self.arg[1:]
             dp.signal_latch_address(Signal.DIRECT_ADDRESS_LOAD, self.arg)
             self.cu.tick()
@@ -40,7 +41,7 @@ class Decoder:
     def decode_memory_commands(self):
         dp = self.cu.data_path
         if self.opcode == Opcode.LOAD:
-            if isinstance(self.arg, str) and self.arg[0] == '#':
+            if isinstance(self.arg, str) and self.arg[0] == "#":
                 self.arg = self.arg[1:]
                 dp.signal_latch_acc(Signal.DIRECT_ACC_LOAD, self.arg)
                 self.cu.tick()
@@ -59,7 +60,7 @@ class Decoder:
     def decode_arithmetic_commands(self):
         dp = self.cu.data_path
         if self.opcode not in [Opcode.INC, Opcode.DEC]:
-            if isinstance(self.arg, str) and self.arg[0] == '#':
+            if isinstance(self.arg, str) and self.arg[0] == "#":
                 self.arg = self.arg[1:]
                 if isinstance(self.arg, int):
                     dp.alu_working(Opcode.ADD, [Operands.ACC])

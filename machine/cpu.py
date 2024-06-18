@@ -1,7 +1,9 @@
+import sys
+
 from machine.decoder import Decoder
 from machine.isa import Opcode
-from machine.machine_signals import Signal, Operands
-import sys
+from machine.machine_signals import Operands, Signal
+
 
 class DataPath:
 
@@ -40,22 +42,27 @@ class DataPath:
         if Signal.STACK_LATCH in regs:
             self.stack_pointer = self.alu_out
 
-    def execute_alu_operation(self, operation, value=0):
+    def execute_alu_operation2(self, operation, value=0):
         if operation == Opcode.ADD:
             return self.alu_out + value
-        elif operation == Opcode.SUB:
+        if operation == Opcode.SUB:
             return self.alu_out - value
-        elif operation == Opcode.MUL:
+        if operation == Opcode.MUL:
             return self.alu_out * value
-        elif operation == Opcode.DIV:
+        if operation == Opcode.DIV:
             return self.alu_out // value
-        elif operation == Opcode.MOD:
+        return None
+
+    def execute_alu_operation(self, operation, value=0):
+        if operation in [Opcode.ADD, Opcode.SUB, Opcode.MUL, Opcode.DIV]:
+            return self.execute_alu_operation2(operation, value)
+        if operation == Opcode.MOD:
             return self.alu_out % int(value)
-        elif operation == Opcode.INC:
+        if operation == Opcode.INC:
             return self.alu_out + 1
-        elif operation == Opcode.DEC:
+        if operation == Opcode.DEC:
             return self.alu_out - 1
-        elif operation == Opcode.CMP:
+        if operation == Opcode.CMP:
             self.flags = {"z": self.alu_out == value or self.alu_out == "",
                           "n": self.alu_out < value
                           if isinstance(self.alu_out, int) and isinstance(value, int) else False}
@@ -65,12 +72,13 @@ class DataPath:
     def get_bus_value(self, bus):
         if bus == Operands.ACC:
             return self.acc
-        elif bus == Operands.BUF:
+        if bus == Operands.BUF:
             return self.buf_reg
-        elif bus == Operands.STACK:
+        if bus == Operands.STACK:
             return self.stack_pointer
-        elif bus == Operands.MEM:
+        if bus == Operands.MEM:
             return self.memory_out
+        return None
 
     def alu_working(self, operation, valves):
         self.alu_out = self.get_bus_value(valves[0])
@@ -104,6 +112,19 @@ class ControlUnit:
         if self._tick > 10000:
             exit(0)
 
+    def decode_command(self, decode):
+        if decode.opcode in [Opcode.LOAD, Opcode.STORE]:
+            decode.decode_memory_commands()
+        elif (decode.opcode in
+              [Opcode.ADD, Opcode.SUB, Opcode.MUL, Opcode.DIV, Opcode.MOD, Opcode.INC, Opcode.DEC, Opcode.CMP]):
+            decode.decode_arithmetic_commands()
+        elif decode.opcode in [Opcode.CALL, Opcode.RET]:
+            decode.decode_subprogram_commands()
+        elif decode.opcode in [Opcode.PUSH, Opcode.POP]:
+            decode.decode_stack_commands()
+        elif decode.opcode in [Opcode.IN, Opcode.OUT]:
+            decode.decode_io_commands()
+
     def execute(self):
         while self.instructions[self.ip][0] != Opcode.HALT:
             self.instr = self.instructions[self.ip]
@@ -114,19 +135,10 @@ class ControlUnit:
                 decode = Decoder(self, self.instr[0], 0)
             signal = Signal.NEXT_IP
 
-            if decode.opcode in [Opcode.LOAD, Opcode.STORE]:
-                decode.decode_memory_commands()
-            elif (decode.opcode in
-                  [Opcode.ADD, Opcode.SUB, Opcode.MUL, Opcode.DIV, Opcode.MOD, Opcode.INC, Opcode.DEC, Opcode.CMP]):
-                decode.decode_arithmetic_commands()
-            elif decode.opcode in [Opcode.JMP, Opcode.JGE, Opcode.JZ, Opcode.JNZ]:
+            if decode.opcode in [Opcode.JMP, Opcode.JGE, Opcode.JZ, Opcode.JNZ]:
                 signal = decode.decode_flow_commands()
-            elif decode.opcode in [Opcode.CALL, Opcode.RET]:
-                decode.decode_subprogram_commands()
-            elif decode.opcode in [Opcode.PUSH, Opcode.POP]:
-                decode.decode_stack_commands()
-            elif decode.opcode in [Opcode.IN, Opcode.OUT]:
-                decode.decode_io_commands()
+            else:
+                self.decode_command(decode)
 
             if self.instr[0] != Opcode.CALL:
                 self.signal_latch_ip(signal, decode.arg)

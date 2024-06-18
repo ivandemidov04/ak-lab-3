@@ -1,6 +1,7 @@
-from machine.isa import Opcode
 import json
 import sys
+
+from machine.isa import Opcode
 
 commands_with_labels = [Opcode.JMP, Opcode.JGE, Opcode.JZ, Opcode.JNZ, Opcode.CALL]
 
@@ -29,21 +30,7 @@ def divide_and_delete_comments(code):
     return instr, data
 
 
-def work_with_labels(instr, data):
-    res_instr, res_data = [], []
-    label_instr, label_data = {}, {}
-
-    cnt = 0
-    for i in range(1, len(instr)):
-        line = instr[i]
-        if ":" in line:
-            index = line.index(':')
-            label = line[0:index]
-            label_instr[label] = cnt
-        else:
-            res_instr.append(line)
-            cnt += 1
-
+def func(data):
     tmp_data = []
     for i in range(1, len(data)):
         line = data[i]
@@ -54,11 +41,29 @@ def work_with_labels(instr, data):
         if line.isnumeric():
             tmp_data.append(line)
         else:
-            for j in range(1, len(line)-1):
+            for j in range(1, len(line) - 1):
                 letter = line[j]
                 tmp_data.append("\'" + letter + "\'")
             tmp_data.append(None)
-    data = tmp_data
+    return tmp_data
+
+
+def work_with_labels(instr, data):
+    res_instr, res_data = [], []
+    label_instr, label_data = {}, {}
+
+    cnt = 0
+    for i in range(1, len(instr)):
+        line = instr[i]
+        if ":" in line:
+            index = line.index(":")
+            label = line[0:index]
+            label_instr[label] = cnt
+        else:
+            res_instr.append(line)
+            cnt += 1
+
+    data = func(data)
 
     cnt = 0
     for i in range(len(data)):
@@ -74,6 +79,26 @@ def work_with_labels(instr, data):
     return res_instr, res_data, label_instr, label_data
 
 
+def fffunc(res, words, label_instr, label_data, data):
+    if words[0] == Opcode.IN or words[0] == Opcode.OUT:
+        res = int(res)
+    elif res[0] == "#":
+        res = res
+    elif res[0] == "*":
+        if res[len(res) - 1] == "+":
+            ind = label_data[res[1:len(res) - 1]]
+            res = "*" + data[ind] + "+"
+        else:
+            ind = label_data[res[1:]]
+            res = "*" + data[ind]
+    else:
+        if words[0] in commands_with_labels:
+            res = int(label_instr.get(res))
+        else:
+            res = label_data.get(res)
+    return res
+
+
 def write_instr(target, instr, data, label_instr, label_data):
     buf = [json.dumps({"_start": label_instr["_start"]})]
     with open(target, "w") as f:
@@ -84,22 +109,7 @@ def write_instr(target, instr, data, label_instr, label_data):
                 buf.append(json.dumps({"index": i, "opcode": words[0]}))
             else:
                 res = words[1]
-                if words[0] == Opcode.IN or words[0] == Opcode.OUT:
-                    res = int(res)
-                elif res[0] == "#":
-                    res = res
-                elif res[0] == "*":
-                    if res[len(res) - 1] == "+":
-                        ind = label_data[res[1:len(res) - 1]]
-                        res = "*" + data[ind] + "+"
-                    else:
-                        ind = label_data[res[1:]]
-                        res = "*" + data[ind]
-                else:
-                    if words[0] in commands_with_labels:
-                        res = int(label_instr.get(res))
-                    else:
-                        res = label_data.get(res)
+                res = fffunc(res, words, label_instr, label_data, data)
                 buf.append(json.dumps({"index": i, "opcode": words[0], "arg": res}))
         f.write("[" + ",\n ".join(buf) + "]\n")
 
@@ -113,7 +123,7 @@ def write_data(target, data):
         f.write("[" + ",\n ".join(buf) + "]")
 
 def main(code, target):
-    with open(code, "r") as f:
+    with open(code) as f:
         code = f.readlines()
 
     instr, data = divide_and_delete_comments(code)

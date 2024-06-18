@@ -1,9 +1,10 @@
 import contextlib
 import io
 import os
+import tempfile
+
 import pytest
 import simulation
-import tempfile
 import translator
 
 
