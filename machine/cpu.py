@@ -1,3 +1,5 @@
+import sys
+
 from machine.decoder import Decoder
 from machine.machine_signals import Signal, Operands
 from machine.isa import Opcode
@@ -40,37 +42,35 @@ class DataPath:
             self.stack_pointer = self.alu_out
 
     def execute_alu_operation(self, operation, value=0):
-        match operation:
-            case Opcode.ADD:
-                return self.alu_out + value
-            case Opcode.SUB:
-                return self.alu_out - value
-            case Opcode.MUL:
-                return self.alu_out * value
-            case Opcode.DIV:
-                return self.alu_out // value
-            case Opcode.MOD:
-                return self.alu_out % int(value)
-            case Opcode.INC:
-                return self.alu_out + 1
-            case Opcode.DEC:
-                return self.alu_out - 1
-            case Opcode.CMP:
-                self.flags = {"z": self.alu_out == value or self.alu_out == "",
-                              "n": self.alu_out < value
-                              if isinstance(self.alu_out, int) and isinstance(value, int) else False}
-                return self.alu_out
+        if operation == Opcode.ADD:
+            return self.alu_out + value
+        elif operation == Opcode.SUB:
+            return self.alu_out - value
+        elif operation == Opcode.MUL:
+            return self.alu_out * value
+        elif operation == Opcode.DIV:
+            return self.alu_out // value
+        elif operation == Opcode.MOD:
+            return self.alu_out % int(value)
+        elif operation == Opcode.INC:
+            return self.alu_out + 1
+        elif operation == Opcode.DEC:
+            return self.alu_out - 1
+        elif operation == Opcode.CMP:
+            self.flags = {"z": self.alu_out == value or self.alu_out == "",
+                          "n": self.alu_out < value
+                          if isinstance(self.alu_out, int) and isinstance(value, int) else False}
+            return self.alu_out
 
     def get_bus_value(self, bus):
-        match bus:
-            case Operands.ACC:
-                return self.acc
-            case Operands.BUF:
-                return self.buf_reg
-            case Operands.STACK:
-                return self.stack_pointer
-            case Operands.MEM:
-                return self.memory_out
+        if bus == Operands.ACC:
+            return self.acc
+        elif bus == Operands.BUF:
+            return self.buf_reg
+        elif bus == Operands.STACK:
+            return self.stack_pointer
+        elif bus == Operands.MEM:
+            return self.memory_out
 
     def alu_working(self, operation, valves):
         self.alu_out = self.get_bus_value(valves[0])
@@ -138,20 +138,23 @@ class ControlUnit:
             if self.instr[0] != Opcode.CALL:
                 self.signal_latch_ip(signal, decode.arg)
 
-            with open("processor.txt", 'a') as f:
-                f.write("TICK: " + str(self._tick) + " | INSTR: " + str(self.instr_counter) + " " + str(self.instr)
+            # with open("processor.txt", 'a') as f:
+            #     f.write("TICK: " + str(self._tick) + " | INSTR: " + str(self.instr_counter) + " " + str(self.instr)
+            #             + " | ACC: " + str(self.data_path.acc) + " | BUF_REG: " + str(self.data_path.buf_reg)
+            #             + " | SP: " + str(self.data_path.stack_pointer) + " | ADDR: " + str(self.data_path.address_reg)
+            #             + " | IP: " + str(self.ip) + " | FLAGS: " + str(self.data_path.flags) + "\n")
+                # f.write(str(self.data_path.data_memory) + "\n")
+            print("TICK: " + str(self._tick) + " | INSTR: " + str(self.instr_counter) + " " + str(self.instr)
                         + " | ACC: " + str(self.data_path.acc) + " | BUF_REG: " + str(self.data_path.buf_reg)
                         + " | SP: " + str(self.data_path.stack_pointer) + " | ADDR: " + str(self.data_path.address_reg)
-                        + " | IP: " + str(self.ip) + " | FLAGS: " + str(self.data_path.flags) + "\n")
-                # f.write(str(self.data_path.data_memory) + "\n")
+                        + " | IP: " + str(self.ip) + " | FLAGS: " + str(self.data_path.flags), file=sys.stderr)
 
-        return str(self.instr_counter) + " " + str(self._tick)
+        return self._tick, self.instr_counter
 
     def signal_latch_ip(self, signal=Signal.NEXT_IP, arg=0):
-        match signal:
-            case Signal.NEXT_IP:
-                self.ip += 1
-            case Signal.JMP_ARG:
-                self.ip = arg
-            case Signal.DATA_IP:
-                self.ip = self.data_path.alu_out
+        if signal == Signal.NEXT_IP:
+            self.ip += 1
+        elif signal == Signal.JMP_ARG:
+            self.ip = arg
+        elif signal == Signal.DATA_IP:
+            self.ip = self.data_path.alu_out

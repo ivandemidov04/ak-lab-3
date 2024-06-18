@@ -1,6 +1,5 @@
 from machine.isa import Opcode
 from machine.machine_signals import Signal, Operands
-import re
 
 class Decoder:
 

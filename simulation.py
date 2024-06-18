@@ -66,15 +66,16 @@ def main(code_file, input_file):
         line = line[ind+8:len(line)-4]
         if line.isnumeric():
             line = int(line)
-        elif not(line == '\\u0000'):
+        else:
             line = line[1:len(line)-1]
         data.append(line)
 
-    result_string = start(first_instr, code, data, input_tokens)
-    print(result_string)
+    ticks, instrs = start(first_instr, code, data, input_tokens)
+    print("ticks_count: " + str(ticks))
+    print("instructions_count: " + str(instrs))
 
 if __name__ == "__main__":
-    assert len(sys.argv) == 3, "Wrong arguments: cpu.py <code_file> <input_file>"
+    assert len(sys.argv) == 3, "Wrong arguments: simulation.py <code_file> <input_file>"
     _, code_file, input_file = sys.argv
     with open("processor.txt", 'w') as f:
         f.write('')

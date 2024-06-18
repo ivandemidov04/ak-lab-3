@@ -1,0 +1,287 @@
+input: Ivan
+
+source: |
+  section .data
+
+  ptr:
+      0
+
+  welcome_ptr:                ; начало строки welcome ; 1ая ячейка памяти по факту
+      2
+
+  welcome:
+      "What's your name?"     ; длина строки с 0-терминатором = 18 ; 0-терминатор в 19ой ячейке
+
+  hello_ptr:                  ; 20ая ячейка по факту
+      22
+
+  name_ptr:                   ; 21ая ячейка по факту
+      29
+
+  hello:
+      "Hello, "               ; длина строки с 0-терминатором = 8 ; 0-терминатор в 29ой ячейке
+
+  section .code
+
+  input:
+      in 1
+      store *ptr+             ; сохраняем в память очередной символ, устанавливаем указатель на следующий символ
+      cmp #'\x00'
+      jnz input               ; если последний введенный символ - не 0-терминатор, то продолжаем читать данные
+      ret
+
+  print:
+      load *ptr+              ; загружаем в аккумулятор очередной символ, устанавливаем указатель на следующий символ
+      out 2
+      cmp #'\x00'             ; проверяем, является ли только что напечатанный символ 0-терминатором
+      jnz print               ; если нет, то печатаем следующий символ
+      ret
+
+  _start:
+      load welcome_ptr
+      store ptr
+      call print
+
+      load name_ptr
+      store ptr
+      call input
+
+      load hello_ptr
+      store ptr
+      call print
+
+      halt
+
+output: |
+  What's your name?
+  Hello, Ivan
+  ticks_count: 354
+  instructions_count: 152
+machine_code: |-
+  [{"_start": 10},
+   {"index": 0, "opcode": "in", "arg": 1},
+   {"index": 1, "opcode": "store", "arg": "*0+"},
+   {"index": 2, "opcode": "cmp", "arg": "#'\\x00'"},
+   {"index": 3, "opcode": "jnz", "arg": 0},
+   {"index": 4, "opcode": "ret"},
+   {"index": 5, "opcode": "load", "arg": "*0+"},
+   {"index": 6, "opcode": "out", "arg": 2},
+   {"index": 7, "opcode": "cmp", "arg": "#'\\x00'"},
+   {"index": 8, "opcode": "jnz", "arg": 5},
+   {"index": 9, "opcode": "ret"},
+   {"index": 10, "opcode": "load", "arg": 1},
+   {"index": 11, "opcode": "store", "arg": 0},
+   {"index": 12, "opcode": "call", "arg": 5},
+   {"index": 13, "opcode": "load", "arg": 21},
+   {"index": 14, "opcode": "store", "arg": 0},
+   {"index": 15, "opcode": "call", "arg": 0},
+   {"index": 16, "opcode": "load", "arg": 20},
+   {"index": 17, "opcode": "store", "arg": 0},
+   {"index": 18, "opcode": "call", "arg": 5},
+   {"index": 19, "opcode": "halt"}]
+  [{"index": 0, "data": "0"},
+   {"index": 1, "data": "2"},
+   {"index": 2, "data": "'W'"},
+   {"index": 3, "data": "'h'"},
+   {"index": 4, "data": "'a'"},
+   {"index": 5, "data": "'t'"},
+   {"index": 6, "data": "'''"},
+   {"index": 7, "data": "'s'"},
+   {"index": 8, "data": "' '"},
+   {"index": 9, "data": "'y'"},
+   {"index": 10, "data": "'o'"},
+   {"index": 11, "data": "'u'"},
+   {"index": 12, "data": "'r'"},
+   {"index": 13, "data": "' '"},
+   {"index": 14, "data": "'n'"},
+   {"index": 15, "data": "'a'"},
+   {"index": 16, "data": "'m'"},
+   {"index": 17, "data": "'e'"},
+   {"index": 18, "data": "'?'"},
+   {"index": 19, "data": null},
+   {"index": 20, "data": "22"},
+   {"index": 21, "data": "29"},
+   {"index": 22, "data": "'H'"},
+   {"index": 23, "data": "'e'"},
+   {"index": 24, "data": "'l'"},
+   {"index": 25, "data": "'l'"},
+   {"index": 26, "data": "'o'"},
+   {"index": 27, "data": "','"},
+   {"index": 28, "data": "' '"},
+   {"index": 29, "data": null},
+   {"index": 30, "data": "0"},
+   {"index": 31, "data": "0"},
+   {"index": 32, "data": "0"},
+   {"index": 33, "data": "0"},
+   {"index": 34, "data": "0"},
+   {"index": 35, "data": "0"},
+   {"index": 36, "data": "0"},
+   {"index": 37, "data": "0"},
+   {"index": 38, "data": "0"},
+   {"index": 39, "data": "0"},
+   {"index": 40, "data": "0"},
+   {"index": 41, "data": "0"},
+   {"index": 42, "data": "0"},
+   {"index": 43, "data": "0"},
+   {"index": 44, "data": "0"},
+   {"index": 45, "data": "0"},
+   {"index": 46, "data": "0"},
+   {"index": 47, "data": "0"},
+   {"index": 48, "data": "0"},
+   {"index": 49, "data": "0"},
+   {"index": 50, "data": "0"},
+   {"index": 51, "data": "0"},
+   {"index": 52, "data": "0"}]
+log: |
+  TICK: 2 | INSTR: 1 ['load', 1] | ACC: 2 | BUF_REG: 0 | SP: 51 | ADDR: 1 | IP: 11 | FLAGS: {'z': False, 'n': False}
+  TICK: 4 | INSTR: 2 ['store', 0] | ACC: 2 | BUF_REG: 0 | SP: 51 | ADDR: 0 | IP: 12 | FLAGS: {'z': False, 'n': False}
+  TICK: 11 | INSTR: 3 ['call', 5] | ACC: 2 | BUF_REG: 2 | SP: 50 | ADDR: 51 | IP: 5 | FLAGS: {'z': False, 'n': False}
+  TICK: 15 | INSTR: 4 ['load', '*0+'] | ACC: W | BUF_REG: 3 | SP: 50 | ADDR: 2 | IP: 6 | FLAGS: {'z': False, 'n': False}
+  TICK: 17 | INSTR: 5 ['out', 2] | ACC: W | BUF_REG: 3 | SP: 50 | ADDR: 2 | IP: 7 | FLAGS: {'z': False, 'n': False}
+  TICK: 19 | INSTR: 6 ['cmp', "#'\\\\x00'"] | ACC: W | BUF_REG: W | SP: 50 | ADDR: 2 | IP: 8 | FLAGS: {'z': False, 'n': False}
+  TICK: 20 | INSTR: 7 ['jnz', 5] | ACC: W | BUF_REG: W | SP: 50 | ADDR: 2 | IP: 5 | FLAGS: {'z': False, 'n': False}
+  TICK: 24 | INSTR: 8 ['load', '*0+'] | ACC: h | BUF_REG: 4 | SP: 50 | ADDR: 3 | IP: 6 | FLAGS: {'z': False, 'n': False}
+  TICK: 26 | INSTR: 9 ['out', 2] | ACC: h | BUF_REG: 4 | SP: 50 | ADDR: 3 | IP: 7 | FLAGS: {'z': False, 'n': False}
+  TICK: 28 | INSTR: 10 ['cmp', "#'\\\\x00'"] | ACC: h | BUF_REG: h | SP: 50 | ADDR: 3 | IP: 8 | FLAGS: {'z': False, 'n': False}
+  TICK: 29 | INSTR: 11 ['jnz', 5] | ACC: h | BUF_REG: h | SP: 50 | ADDR: 3 | IP: 5 | FLAGS: {'z': False, 'n': False}
+  TICK: 33 | INSTR: 12 ['load', '*0+'] | ACC: a | BUF_REG: 5 | SP: 50 | ADDR: 4 | IP: 6 | FLAGS: {'z': False, 'n': False}
+  TICK: 35 | INSTR: 13 ['out', 2] | ACC: a | BUF_REG: 5 | SP: 50 | ADDR: 4 | IP: 7 | FLAGS: {'z': False, 'n': False}
+  TICK: 37 | INSTR: 14 ['cmp', "#'\\\\x00'"] | ACC: a | BUF_REG: a | SP: 50 | ADDR: 4 | IP: 8 | FLAGS: {'z': False, 'n': False}
+  TICK: 38 | INSTR: 15 ['jnz', 5] | ACC: a | BUF_REG: a | SP: 50 | ADDR: 4 | IP: 5 | FLAGS: {'z': False, 'n': False}
+  TICK: 42 | INSTR: 16 ['load', '*0+'] | ACC: t | BUF_REG: 6 | SP: 50 | ADDR: 5 | IP: 6 | FLAGS: {'z': False, 'n': False}
+  TICK: 44 | INSTR: 17 ['out', 2] | ACC: t | BUF_REG: 6 | SP: 50 | ADDR: 5 | IP: 7 | FLAGS: {'z': False, 'n': False}
+  TICK: 46 | INSTR: 18 ['cmp', "#'\\\\x00'"] | ACC: t | BUF_REG: t | SP: 50 | ADDR: 5 | IP: 8 | FLAGS: {'z': False, 'n': False}
+  TICK: 47 | INSTR: 19 ['jnz', 5] | ACC: t | BUF_REG: t | SP: 50 | ADDR: 5 | IP: 5 | FLAGS: {'z': False, 'n': False}
+  TICK: 51 | INSTR: 20 ['load', '*0+'] | ACC: ' | BUF_REG: 7 | SP: 50 | ADDR: 6 | IP: 6 | FLAGS: {'z': False, 'n': False}
+  TICK: 53 | INSTR: 21 ['out', 2] | ACC: ' | BUF_REG: 7 | SP: 50 | ADDR: 6 | IP: 7 | FLAGS: {'z': False, 'n': False}
+  TICK: 55 | INSTR: 22 ['cmp', "#'\\\\x00'"] | ACC: ' | BUF_REG: ' | SP: 50 | ADDR: 6 | IP: 8 | FLAGS: {'z': False, 'n': False}
+  TICK: 56 | INSTR: 23 ['jnz', 5] | ACC: ' | BUF_REG: ' | SP: 50 | ADDR: 6 | IP: 5 | FLAGS: {'z': False, 'n': False}
+  TICK: 60 | INSTR: 24 ['load', '*0+'] | ACC: s | BUF_REG: 8 | SP: 50 | ADDR: 7 | IP: 6 | FLAGS: {'z': False, 'n': False}
+  TICK: 62 | INSTR: 25 ['out', 2] | ACC: s | BUF_REG: 8 | SP: 50 | ADDR: 7 | IP: 7 | FLAGS: {'z': False, 'n': False}
+  TICK: 64 | INSTR: 26 ['cmp', "#'\\\\x00'"] | ACC: s | BUF_REG: s | SP: 50 | ADDR: 7 | IP: 8 | FLAGS: {'z': False, 'n': False}
+  TICK: 65 | INSTR: 27 ['jnz', 5] | ACC: s | BUF_REG: s | SP: 50 | ADDR: 7 | IP: 5 | FLAGS: {'z': False, 'n': False}
+  TICK: 69 | INSTR: 28 ['load', '*0+'] | ACC:   | BUF_REG: 9 | SP: 50 | ADDR: 8 | IP: 6 | FLAGS: {'z': False, 'n': False}
+  TICK: 71 | INSTR: 29 ['out', 2] | ACC:   | BUF_REG: 9 | SP: 50 | ADDR: 8 | IP: 7 | FLAGS: {'z': False, 'n': False}
+  TICK: 73 | INSTR: 30 ['cmp', "#'\\\\x00'"] | ACC:   | BUF_REG:   | SP: 50 | ADDR: 8 | IP: 8 | FLAGS: {'z': False, 'n': False}
+  TICK: 74 | INSTR: 31 ['jnz', 5] | ACC:   | BUF_REG:   | SP: 50 | ADDR: 8 | IP: 5 | FLAGS: {'z': False, 'n': False}
+  TICK: 78 | INSTR: 32 ['load', '*0+'] | ACC: y | BUF_REG: 10 | SP: 50 | ADDR: 9 | IP: 6 | FLAGS: {'z': False, 'n': False}
+  TICK: 80 | INSTR: 33 ['out', 2] | ACC: y | BUF_REG: 10 | SP: 50 | ADDR: 9 | IP: 7 | FLAGS: {'z': False, 'n': False}
+  TICK: 82 | INSTR: 34 ['cmp', "#'\\\\x00'"] | ACC: y | BUF_REG: y | SP: 50 | ADDR: 9 | IP: 8 | FLAGS: {'z': False, 'n': False}
+  TICK: 83 | INSTR: 35 ['jnz', 5] | ACC: y | BUF_REG: y | SP: 50 | ADDR: 9 | IP: 5 | FLAGS: {'z': False, 'n': False}
+  TICK: 87 | INSTR: 36 ['load', '*0+'] | ACC: o | BUF_REG: 11 | SP: 50 | ADDR: 10 | IP: 6 | FLAGS: {'z': False, 'n': False}
+  TICK: 89 | INSTR: 37 ['out', 2] | ACC: o | BUF_REG: 11 | SP: 50 | ADDR: 10 | IP: 7 | FLAGS: {'z': False, 'n': False}
+  TICK: 91 | INSTR: 38 ['cmp', "#'\\\\x00'"] | ACC: o | BUF_REG: o | SP: 50 | ADDR: 10 | IP: 8 | FLAGS: {'z': False, 'n': False}
+  TICK: 92 | INSTR: 39 ['jnz', 5] | ACC: o | BUF_REG: o | SP: 50 | ADDR: 10 | IP: 5 | FLAGS: {'z': False, 'n': False}
+  TICK: 96 | INSTR: 40 ['load', '*0+'] | ACC: u | BUF_REG: 12 | SP: 50 | ADDR: 11 | IP: 6 | FLAGS: {'z': False, 'n': False}
+  TICK: 98 | INSTR: 41 ['out', 2] | ACC: u | BUF_REG: 12 | SP: 50 | ADDR: 11 | IP: 7 | FLAGS: {'z': False, 'n': False}
+  TICK: 100 | INSTR: 42 ['cmp', "#'\\\\x00'"] | ACC: u | BUF_REG: u | SP: 50 | ADDR: 11 | IP: 8 | FLAGS: {'z': False, 'n': False}
+  TICK: 101 | INSTR: 43 ['jnz', 5] | ACC: u | BUF_REG: u | SP: 50 | ADDR: 11 | IP: 5 | FLAGS: {'z': False, 'n': False}
+  TICK: 105 | INSTR: 44 ['load', '*0+'] | ACC: r | BUF_REG: 13 | SP: 50 | ADDR: 12 | IP: 6 | FLAGS: {'z': False, 'n': False}
+  TICK: 107 | INSTR: 45 ['out', 2] | ACC: r | BUF_REG: 13 | SP: 50 | ADDR: 12 | IP: 7 | FLAGS: {'z': False, 'n': False}
+  TICK: 109 | INSTR: 46 ['cmp', "#'\\\\x00'"] | ACC: r | BUF_REG: r | SP: 50 | ADDR: 12 | IP: 8 | FLAGS: {'z': False, 'n': False}
+  TICK: 110 | INSTR: 47 ['jnz', 5] | ACC: r | BUF_REG: r | SP: 50 | ADDR: 12 | IP: 5 | FLAGS: {'z': False, 'n': False}
+  TICK: 114 | INSTR: 48 ['load', '*0+'] | ACC:   | BUF_REG: 14 | SP: 50 | ADDR: 13 | IP: 6 | FLAGS: {'z': False, 'n': False}
+  TICK: 116 | INSTR: 49 ['out', 2] | ACC:   | BUF_REG: 14 | SP: 50 | ADDR: 13 | IP: 7 | FLAGS: {'z': False, 'n': False}
+  TICK: 118 | INSTR: 50 ['cmp', "#'\\\\x00'"] | ACC:   | BUF_REG:   | SP: 50 | ADDR: 13 | IP: 8 | FLAGS: {'z': False, 'n': False}
+  TICK: 119 | INSTR: 51 ['jnz', 5] | ACC:   | BUF_REG:   | SP: 50 | ADDR: 13 | IP: 5 | FLAGS: {'z': False, 'n': False}
+  TICK: 123 | INSTR: 52 ['load', '*0+'] | ACC: n | BUF_REG: 15 | SP: 50 | ADDR: 14 | IP: 6 | FLAGS: {'z': False, 'n': False}
+  TICK: 125 | INSTR: 53 ['out', 2] | ACC: n | BUF_REG: 15 | SP: 50 | ADDR: 14 | IP: 7 | FLAGS: {'z': False, 'n': False}
+  TICK: 127 | INSTR: 54 ['cmp', "#'\\\\x00'"] | ACC: n | BUF_REG: n | SP: 50 | ADDR: 14 | IP: 8 | FLAGS: {'z': False, 'n': False}
+  TICK: 128 | INSTR: 55 ['jnz', 5] | ACC: n | BUF_REG: n | SP: 50 | ADDR: 14 | IP: 5 | FLAGS: {'z': False, 'n': False}
+  TICK: 132 | INSTR: 56 ['load', '*0+'] | ACC: a | BUF_REG: 16 | SP: 50 | ADDR: 15 | IP: 6 | FLAGS: {'z': False, 'n': False}
+  TICK: 134 | INSTR: 57 ['out', 2] | ACC: a | BUF_REG: 16 | SP: 50 | ADDR: 15 | IP: 7 | FLAGS: {'z': False, 'n': False}
+  TICK: 136 | INSTR: 58 ['cmp', "#'\\\\x00'"] | ACC: a | BUF_REG: a | SP: 50 | ADDR: 15 | IP: 8 | FLAGS: {'z': False, 'n': False}
+  TICK: 137 | INSTR: 59 ['jnz', 5] | ACC: a | BUF_REG: a | SP: 50 | ADDR: 15 | IP: 5 | FLAGS: {'z': False, 'n': False}
+  TICK: 141 | INSTR: 60 ['load', '*0+'] | ACC: m | BUF_REG: 17 | SP: 50 | ADDR: 16 | IP: 6 | FLAGS: {'z': False, 'n': False}
+  TICK: 143 | INSTR: 61 ['out', 2] | ACC: m | BUF_REG: 17 | SP: 50 | ADDR: 16 | IP: 7 | FLAGS: {'z': False, 'n': False}
+  TICK: 145 | INSTR: 62 ['cmp', "#'\\\\x00'"] | ACC: m | BUF_REG: m | SP: 50 | ADDR: 16 | IP: 8 | FLAGS: {'z': False, 'n': False}
+  TICK: 146 | INSTR: 63 ['jnz', 5] | ACC: m | BUF_REG: m | SP: 50 | ADDR: 16 | IP: 5 | FLAGS: {'z': False, 'n': False}
+  TICK: 150 | INSTR: 64 ['load', '*0+'] | ACC: e | BUF_REG: 18 | SP: 50 | ADDR: 17 | IP: 6 | FLAGS: {'z': False, 'n': False}
+  TICK: 152 | INSTR: 65 ['out', 2] | ACC: e | BUF_REG: 18 | SP: 50 | ADDR: 17 | IP: 7 | FLAGS: {'z': False, 'n': False}
+  TICK: 154 | INSTR: 66 ['cmp', "#'\\\\x00'"] | ACC: e | BUF_REG: e | SP: 50 | ADDR: 17 | IP: 8 | FLAGS: {'z': False, 'n': False}
+  TICK: 155 | INSTR: 67 ['jnz', 5] | ACC: e | BUF_REG: e | SP: 50 | ADDR: 17 | IP: 5 | FLAGS: {'z': False, 'n': False}
+  TICK: 159 | INSTR: 68 ['load', '*0+'] | ACC: ? | BUF_REG: 19 | SP: 50 | ADDR: 18 | IP: 6 | FLAGS: {'z': False, 'n': False}
+  TICK: 161 | INSTR: 69 ['out', 2] | ACC: ? | BUF_REG: 19 | SP: 50 | ADDR: 18 | IP: 7 | FLAGS: {'z': False, 'n': False}
+  TICK: 163 | INSTR: 70 ['cmp', "#'\\\\x00'"] | ACC: ? | BUF_REG: ? | SP: 50 | ADDR: 18 | IP: 8 | FLAGS: {'z': False, 'n': False}
+  TICK: 164 | INSTR: 71 ['jnz', 5] | ACC: ? | BUF_REG: ? | SP: 50 | ADDR: 18 | IP: 5 | FLAGS: {'z': False, 'n': False}
+  TICK: 168 | INSTR: 72 ['load', '*0+'] | ACC:  | BUF_REG: 20 | SP: 50 | ADDR: 19 | IP: 6 | FLAGS: {'z': False, 'n': False}
+  TICK: 170 | INSTR: 73 ['out', 2] | ACC:  | BUF_REG: 20 | SP: 50 | ADDR: 19 | IP: 7 | FLAGS: {'z': False, 'n': False}
+  TICK: 172 | INSTR: 74 ['cmp', "#'\\\\x00'"] | ACC:  | BUF_REG:  | SP: 50 | ADDR: 19 | IP: 8 | FLAGS: {'z': True, 'n': False}
+  TICK: 173 | INSTR: 75 ['jnz', 5] | ACC:  | BUF_REG:  | SP: 50 | ADDR: 19 | IP: 9 | FLAGS: {'z': True, 'n': False}
+  TICK: 175 | INSTR: 76 ['ret'] | ACC:  | BUF_REG:  | SP: 51 | ADDR: 51 | IP: 13 | FLAGS: {'z': False, 'n': False}
+  TICK: 177 | INSTR: 77 ['load', 21] | ACC: 29 | BUF_REG:  | SP: 51 | ADDR: 21 | IP: 14 | FLAGS: {'z': False, 'n': False}
+  TICK: 179 | INSTR: 78 ['store', 0] | ACC: 29 | BUF_REG:  | SP: 51 | ADDR: 0 | IP: 15 | FLAGS: {'z': False, 'n': False}
+  TICK: 186 | INSTR: 79 ['call', 0] | ACC: 29 | BUF_REG: 29 | SP: 50 | ADDR: 51 | IP: 0 | FLAGS: {'z': False, 'n': False}
+  TICK: 188 | INSTR: 80 ['in', 1] | ACC: I | BUF_REG: 29 | SP: 50 | ADDR: 51 | IP: 1 | FLAGS: {'z': False, 'n': False}
+  TICK: 192 | INSTR: 81 ['store', '*0+'] | ACC: I | BUF_REG: 30 | SP: 50 | ADDR: 29 | IP: 2 | FLAGS: {'z': False, 'n': False}
+  TICK: 194 | INSTR: 82 ['cmp', "#'\\\\x00'"] | ACC: I | BUF_REG: I | SP: 50 | ADDR: 29 | IP: 3 | FLAGS: {'z': False, 'n': False}
+  TICK: 195 | INSTR: 83 ['jnz', 0] | ACC: I | BUF_REG: I | SP: 50 | ADDR: 29 | IP: 0 | FLAGS: {'z': False, 'n': False}
+  TICK: 197 | INSTR: 84 ['in', 1] | ACC: v | BUF_REG: I | SP: 50 | ADDR: 29 | IP: 1 | FLAGS: {'z': False, 'n': False}
+  TICK: 201 | INSTR: 85 ['store', '*0+'] | ACC: v | BUF_REG: 31 | SP: 50 | ADDR: 30 | IP: 2 | FLAGS: {'z': False, 'n': False}
+  TICK: 203 | INSTR: 86 ['cmp', "#'\\\\x00'"] | ACC: v | BUF_REG: v | SP: 50 | ADDR: 30 | IP: 3 | FLAGS: {'z': False, 'n': False}
+  TICK: 204 | INSTR: 87 ['jnz', 0] | ACC: v | BUF_REG: v | SP: 50 | ADDR: 30 | IP: 0 | FLAGS: {'z': False, 'n': False}
+  TICK: 206 | INSTR: 88 ['in', 1] | ACC: a | BUF_REG: v | SP: 50 | ADDR: 30 | IP: 1 | FLAGS: {'z': False, 'n': False}
+  TICK: 210 | INSTR: 89 ['store', '*0+'] | ACC: a | BUF_REG: 32 | SP: 50 | ADDR: 31 | IP: 2 | FLAGS: {'z': False, 'n': False}
+  TICK: 212 | INSTR: 90 ['cmp', "#'\\\\x00'"] | ACC: a | BUF_REG: a | SP: 50 | ADDR: 31 | IP: 3 | FLAGS: {'z': False, 'n': False}
+  TICK: 213 | INSTR: 91 ['jnz', 0] | ACC: a | BUF_REG: a | SP: 50 | ADDR: 31 | IP: 0 | FLAGS: {'z': False, 'n': False}
+  TICK: 215 | INSTR: 92 ['in', 1] | ACC: n | BUF_REG: a | SP: 50 | ADDR: 31 | IP: 1 | FLAGS: {'z': False, 'n': False}
+  TICK: 219 | INSTR: 93 ['store', '*0+'] | ACC: n | BUF_REG: 33 | SP: 50 | ADDR: 32 | IP: 2 | FLAGS: {'z': False, 'n': False}
+  TICK: 221 | INSTR: 94 ['cmp', "#'\\\\x00'"] | ACC: n | BUF_REG: n | SP: 50 | ADDR: 32 | IP: 3 | FLAGS: {'z': False, 'n': False}
+  TICK: 222 | INSTR: 95 ['jnz', 0] | ACC: n | BUF_REG: n | SP: 50 | ADDR: 32 | IP: 0 | FLAGS: {'z': False, 'n': False}
+  TICK: 224 | INSTR: 96 ['in', 1] | ACC:  | BUF_REG: n | SP: 50 | ADDR: 32 | IP: 1 | FLAGS: {'z': False, 'n': False}
+  TICK: 228 | INSTR: 97 ['store', '*0+'] | ACC:  | BUF_REG: 34 | SP: 50 | ADDR: 33 | IP: 2 | FLAGS: {'z': False, 'n': False}
+  TICK: 230 | INSTR: 98 ['cmp', "#'\\\\x00'"] | ACC:  | BUF_REG:  | SP: 50 | ADDR: 33 | IP: 3 | FLAGS: {'z': True, 'n': False}
+  TICK: 231 | INSTR: 99 ['jnz', 0] | ACC:  | BUF_REG:  | SP: 50 | ADDR: 33 | IP: 4 | FLAGS: {'z': True, 'n': False}
+  TICK: 233 | INSTR: 100 ['ret'] | ACC:  | BUF_REG:  | SP: 51 | ADDR: 51 | IP: 16 | FLAGS: {'z': False, 'n': False}
+  TICK: 235 | INSTR: 101 ['load', 20] | ACC: 22 | BUF_REG:  | SP: 51 | ADDR: 20 | IP: 17 | FLAGS: {'z': False, 'n': False}
+  TICK: 237 | INSTR: 102 ['store', 0] | ACC: 22 | BUF_REG:  | SP: 51 | ADDR: 0 | IP: 18 | FLAGS: {'z': False, 'n': False}
+  TICK: 244 | INSTR: 103 ['call', 5] | ACC: 22 | BUF_REG: 22 | SP: 50 | ADDR: 51 | IP: 5 | FLAGS: {'z': False, 'n': False}
+  TICK: 248 | INSTR: 104 ['load', '*0+'] | ACC: H | BUF_REG: 23 | SP: 50 | ADDR: 22 | IP: 6 | FLAGS: {'z': False, 'n': False}
+  TICK: 250 | INSTR: 105 ['out', 2] | ACC: H | BUF_REG: 23 | SP: 50 | ADDR: 22 | IP: 7 | FLAGS: {'z': False, 'n': False}
+  TICK: 252 | INSTR: 106 ['cmp', "#'\\\\x00'"] | ACC: H | BUF_REG: H | SP: 50 | ADDR: 22 | IP: 8 | FLAGS: {'z': False, 'n': False}
+  TICK: 253 | INSTR: 107 ['jnz', 5] | ACC: H | BUF_REG: H | SP: 50 | ADDR: 22 | IP: 5 | FLAGS: {'z': False, 'n': False}
+  TICK: 257 | INSTR: 108 ['load', '*0+'] | ACC: e | BUF_REG: 24 | SP: 50 | ADDR: 23 | IP: 6 | FLAGS: {'z': False, 'n': False}
+  TICK: 259 | INSTR: 109 ['out', 2] | ACC: e | BUF_REG: 24 | SP: 50 | ADDR: 23 | IP: 7 | FLAGS: {'z': False, 'n': False}
+  TICK: 261 | INSTR: 110 ['cmp', "#'\\\\x00'"] | ACC: e | BUF_REG: e | SP: 50 | ADDR: 23 | IP: 8 | FLAGS: {'z': False, 'n': False}
+  TICK: 262 | INSTR: 111 ['jnz', 5] | ACC: e | BUF_REG: e | SP: 50 | ADDR: 23 | IP: 5 | FLAGS: {'z': False, 'n': False}
+  TICK: 266 | INSTR: 112 ['load', '*0+'] | ACC: l | BUF_REG: 25 | SP: 50 | ADDR: 24 | IP: 6 | FLAGS: {'z': False, 'n': False}
+  TICK: 268 | INSTR: 113 ['out', 2] | ACC: l | BUF_REG: 25 | SP: 50 | ADDR: 24 | IP: 7 | FLAGS: {'z': False, 'n': False}
+  TICK: 270 | INSTR: 114 ['cmp', "#'\\\\x00'"] | ACC: l | BUF_REG: l | SP: 50 | ADDR: 24 | IP: 8 | FLAGS: {'z': False, 'n': False}
+  TICK: 271 | INSTR: 115 ['jnz', 5] | ACC: l | BUF_REG: l | SP: 50 | ADDR: 24 | IP: 5 | FLAGS: {'z': False, 'n': False}
+  TICK: 275 | INSTR: 116 ['load', '*0+'] | ACC: l | BUF_REG: 26 | SP: 50 | ADDR: 25 | IP: 6 | FLAGS: {'z': False, 'n': False}
+  TICK: 277 | INSTR: 117 ['out', 2] | ACC: l | BUF_REG: 26 | SP: 50 | ADDR: 25 | IP: 7 | FLAGS: {'z': False, 'n': False}
+  TICK: 279 | INSTR: 118 ['cmp', "#'\\\\x00'"] | ACC: l | BUF_REG: l | SP: 50 | ADDR: 25 | IP: 8 | FLAGS: {'z': False, 'n': False}
+  TICK: 280 | INSTR: 119 ['jnz', 5] | ACC: l | BUF_REG: l | SP: 50 | ADDR: 25 | IP: 5 | FLAGS: {'z': False, 'n': False}
+  TICK: 284 | INSTR: 120 ['load', '*0+'] | ACC: o | BUF_REG: 27 | SP: 50 | ADDR: 26 | IP: 6 | FLAGS: {'z': False, 'n': False}
+  TICK: 286 | INSTR: 121 ['out', 2] | ACC: o | BUF_REG: 27 | SP: 50 | ADDR: 26 | IP: 7 | FLAGS: {'z': False, 'n': False}
+  TICK: 288 | INSTR: 122 ['cmp', "#'\\\\x00'"] | ACC: o | BUF_REG: o | SP: 50 | ADDR: 26 | IP: 8 | FLAGS: {'z': False, 'n': False}
+  TICK: 289 | INSTR: 123 ['jnz', 5] | ACC: o | BUF_REG: o | SP: 50 | ADDR: 26 | IP: 5 | FLAGS: {'z': False, 'n': False}
+  TICK: 293 | INSTR: 124 ['load', '*0+'] | ACC: , | BUF_REG: 28 | SP: 50 | ADDR: 27 | IP: 6 | FLAGS: {'z': False, 'n': False}
+  TICK: 295 | INSTR: 125 ['out', 2] | ACC: , | BUF_REG: 28 | SP: 50 | ADDR: 27 | IP: 7 | FLAGS: {'z': False, 'n': False}
+  TICK: 297 | INSTR: 126 ['cmp', "#'\\\\x00'"] | ACC: , | BUF_REG: , | SP: 50 | ADDR: 27 | IP: 8 | FLAGS: {'z': False, 'n': False}
+  TICK: 298 | INSTR: 127 ['jnz', 5] | ACC: , | BUF_REG: , | SP: 50 | ADDR: 27 | IP: 5 | FLAGS: {'z': False, 'n': False}
+  TICK: 302 | INSTR: 128 ['load', '*0+'] | ACC:   | BUF_REG: 29 | SP: 50 | ADDR: 28 | IP: 6 | FLAGS: {'z': False, 'n': False}
+  TICK: 304 | INSTR: 129 ['out', 2] | ACC:   | BUF_REG: 29 | SP: 50 | ADDR: 28 | IP: 7 | FLAGS: {'z': False, 'n': False}
+  TICK: 306 | INSTR: 130 ['cmp', "#'\\\\x00'"] | ACC:   | BUF_REG:   | SP: 50 | ADDR: 28 | IP: 8 | FLAGS: {'z': False, 'n': False}
+  TICK: 307 | INSTR: 131 ['jnz', 5] | ACC:   | BUF_REG:   | SP: 50 | ADDR: 28 | IP: 5 | FLAGS: {'z': False, 'n': False}
+  TICK: 311 | INSTR: 132 ['load', '*0+'] | ACC: I | BUF_REG: 30 | SP: 50 | ADDR: 29 | IP: 6 | FLAGS: {'z': False, 'n': False}
+  TICK: 313 | INSTR: 133 ['out', 2] | ACC: I | BUF_REG: 30 | SP: 50 | ADDR: 29 | IP: 7 | FLAGS: {'z': False, 'n': False}
+  TICK: 315 | INSTR: 134 ['cmp', "#'\\\\x00'"] | ACC: I | BUF_REG: I | SP: 50 | ADDR: 29 | IP: 8 | FLAGS: {'z': False, 'n': False}
+  TICK: 316 | INSTR: 135 ['jnz', 5] | ACC: I | BUF_REG: I | SP: 50 | ADDR: 29 | IP: 5 | FLAGS: {'z': False, 'n': False}
+  TICK: 320 | INSTR: 136 ['load', '*0+'] | ACC: v | BUF_REG: 31 | SP: 50 | ADDR: 30 | IP: 6 | FLAGS: {'z': False, 'n': False}
+  TICK: 322 | INSTR: 137 ['out', 2] | ACC: v | BUF_REG: 31 | SP: 50 | ADDR: 30 | IP: 7 | FLAGS: {'z': False, 'n': False}
+  TICK: 324 | INSTR: 138 ['cmp', "#'\\\\x00'"] | ACC: v | BUF_REG: v | SP: 50 | ADDR: 30 | IP: 8 | FLAGS: {'z': False, 'n': False}
+  TICK: 325 | INSTR: 139 ['jnz', 5] | ACC: v | BUF_REG: v | SP: 50 | ADDR: 30 | IP: 5 | FLAGS: {'z': False, 'n': False}
+  TICK: 329 | INSTR: 140 ['load', '*0+'] | ACC: a | BUF_REG: 32 | SP: 50 | ADDR: 31 | IP: 6 | FLAGS: {'z': False, 'n': False}
+  TICK: 331 | INSTR: 141 ['out', 2] | ACC: a | BUF_REG: 32 | SP: 50 | ADDR: 31 | IP: 7 | FLAGS: {'z': False, 'n': False}
+  TICK: 333 | INSTR: 142 ['cmp', "#'\\\\x00'"] | ACC: a | BUF_REG: a | SP: 50 | ADDR: 31 | IP: 8 | FLAGS: {'z': False, 'n': False}
+  TICK: 334 | INSTR: 143 ['jnz', 5] | ACC: a | BUF_REG: a | SP: 50 | ADDR: 31 | IP: 5 | FLAGS: {'z': False, 'n': False}
+  TICK: 338 | INSTR: 144 ['load', '*0+'] | ACC: n | BUF_REG: 33 | SP: 50 | ADDR: 32 | IP: 6 | FLAGS: {'z': False, 'n': False}
+  TICK: 340 | INSTR: 145 ['out', 2] | ACC: n | BUF_REG: 33 | SP: 50 | ADDR: 32 | IP: 7 | FLAGS: {'z': False, 'n': False}
+  TICK: 342 | INSTR: 146 ['cmp', "#'\\\\x00'"] | ACC: n | BUF_REG: n | SP: 50 | ADDR: 32 | IP: 8 | FLAGS: {'z': False, 'n': False}
+  TICK: 343 | INSTR: 147 ['jnz', 5] | ACC: n | BUF_REG: n | SP: 50 | ADDR: 32 | IP: 5 | FLAGS: {'z': False, 'n': False}
+  TICK: 347 | INSTR: 148 ['load', '*0+'] | ACC:  | BUF_REG: 34 | SP: 50 | ADDR: 33 | IP: 6 | FLAGS: {'z': False, 'n': False}
+  TICK: 349 | INSTR: 149 ['out', 2] | ACC:  | BUF_REG: 34 | SP: 50 | ADDR: 33 | IP: 7 | FLAGS: {'z': False, 'n': False}
+  TICK: 351 | INSTR: 150 ['cmp', "#'\\\\x00'"] | ACC:  | BUF_REG:  | SP: 50 | ADDR: 33 | IP: 8 | FLAGS: {'z': True, 'n': False}
+  TICK: 352 | INSTR: 151 ['jnz', 5] | ACC:  | BUF_REG:  | SP: 50 | ADDR: 33 | IP: 9 | FLAGS: {'z': True, 'n': False}
+  TICK: 354 | INSTR: 152 ['ret'] | ACC:  | BUF_REG:  | SP: 51 | ADDR: 51 | IP: 19 | FLAGS: {'z': False, 'n': False}
