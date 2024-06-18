@@ -43,7 +43,7 @@ def func(data):
         else:
             for j in range(1, len(line) - 1):
                 letter = line[j]
-                tmp_data.append("\'" + letter + "\'")
+                tmp_data.append("'" + letter + "'")
             tmp_data.append(None)
     return tmp_data
 
