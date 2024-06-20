@@ -132,7 +132,7 @@ _Операции ввода-вывода:_
 - opcode - строка с кодом операции;
 - arg - аргумент (может отсутствовать);
 
-Все инструкции описаны в файле [isa.py]() в классе `Opcode`.
+Все инструкции описаны в файле [isa.py](https://github.com/ivandemidov04/ak-lab-3/blob/main/machine/isa.py) в классе `Opcode`.
 
 ## Организация памяти
 
@@ -220,13 +220,6 @@ _Операции ввода-вывода:_
 | jne        |       1       | if Z==0: ARG -> IP |
 | jge        |       1       | if N==0: ARG -> IP |
 
-**Инструкции подпрограмм**
-
-| Инструкция                  | Кол-во тактов | Мнемоника                                                                        |
-|-----------------------------|:-------------:|----------------------------------------------------------------------------------|
-| call                        |       7       | SP -> ADDR; ACC -> BR; IP -> ACC; ACC -> MEM; SP - 1 -> SP; BR -> ACC; ARG -> IP |
-| ret                         |       2       | SP + 1 -> SP, ADDR; MEM -> IP                                                    |
-
 **Операции со стеком:**
 
 | Инструкция | Кол-во тактов | Мнемоника                            |
@@ -248,7 +241,7 @@ _Операции ввода-вывода:_
 
 Интерфейс командной строки: translator.py <input_file> <instruction_file>
 
-Реализовано в модуле: [translator.py]()
+Реализовано в модуле: [translator.py](https://github.com/ivandemidov04/ak-lab-3/blob/main/translator.py)
 
 Алгоритм трансляции:
 1. Удаление комментариев и пустых строк.
@@ -258,11 +251,75 @@ _Операции ввода-вывода:_
 
 ## Модель процессора
 
+Интерфейс командной строки: machine.py <machine_code_file> <input_file>
+
 ### ControlUnit
 
-![control_unit](C:\Users\er280\PycharmProjects\ak-lab-3\control_unit.png)
+![control_unit](https://github.com/ivandemidov04/ak-lab-3/blob/main/control_unit.png)
+
+Реализован в классе ```ControlUnit``` в модуле [cpu.py](https://github.com/ivandemidov04/ak-lab-3/blob/main/machine/cpu.py).
+
+Hardwired (реализовано полностью на Python).
+- Цикл симуляции осуществляется в метод ```execute```.
+- В методе ```execute``` вызываются методы класса ```Decoder```, формирующие управляющие сигналы и данные в DataPath и выполняющие инструкции процессора. Класс ```Decoder``` реализован в модуле
+[decoder.py](https://github.com/ivandemidov04/ak-lab-3/blob/main/machine/decoder.py).
+- Отсчет времени работы ведется в тактах. После каждой инструкции в поток ошибок добавляется информация о состоянии процессора. Состояние процессора показывает:
+    - время в тактах
+    - текущую инструкцию
+    - значения регистров
+    - флаги
 
 ### DataPath
 
-![datapath](C:\Users\er280\PycharmProjects\ak-lab-3\datapath.png)
+![datapath](https://github.com/ivandemidov04/ak-lab-3/blob/main/datapath.png)
 
+Реализован в классе ```DataPath``` в модуле [cpu.py](https://github.com/ivandemidov04/ak-lab-3/blob/main/machine/cpu.py).
+
+- Управляющие сигналы и данные на шинах поступают с декодера
+
+**Сигналы**
+
+Все сигналы хранятся в модуле [machine_signals.py](https://github.com/ivandemidov04/ak-lab-3/blob/main/machine/machine_signals.py)
+- ```signal_latch_acc/buf/stack/address```. Защелкивают значения с шин в регистры.
+- ```sel_acc/address``` - сигналы на соответствующие мультиплексоры. Выбирают либо пропустить значения с шин из декодера или из ```alu_out```.
+- ```operation``` - выбор математической операции для АЛУ. Операция происходит в методе ```alu_working```, а выбор операции в ```execute_alu_operation```.
+- ```valves``` - вентили на шинах данных из регистров и из памяти. Для совершения математической операции или просто для пропуска данных через АЛУ нужно открыть соответствующие вентили. Получение данных с шин реализуется в методе ```get_bus_value```. Названия вентелей хранятся в том же модули, что и сигналы в классе ```Operands```.
+- ```read/write``` - сигналы для чтения и записи данных в память соответственно. Данные читаются/записыватся из ячейки, указанной в адресном регистре. Реализуется в методе ```memory_manager```.
+
+**Шины**
+- Есть две входных шин данных, которые приходят с декодера:
+  - ```load_acc```. Используется для прямой загрузки в аккумулятор.
+  - ```load_address```. Загружает значение ячейки памяти, указанной в аргументе инструкции.
+- И две выходных шин:
+  - ```alu_out```. В ControlUnit называется ```data```
+  - ```flags```. По значению флагов происходят условные переходы. Поступают на декодер.
+
+**Флаги**
+
+- устанавливаются по значению аккумулятора или после инструкции ```cmp```.
+- Флаг ```Z``` (zero) - устанавливается в 1, если в аккумуляторе 0 или результат cmp равен 0.
+- Флаг ```N``` (negative) - устанавливается в 1, если в аккумуляторе отрицательное число или результат cmp \- отрицательный.
+
+## Тестирование
+
+Тестирование выполняется при помощи golden test-ов в формате yaml. Файлы .yml лежат в папке [golden](https://github.com/ivandemidov04/ak-lab-3/blob/main/golden). Тесты содержат входные данные и проверку на
+- код программы
+- машинный код
+- вывод процессора
+- журнал работы процессора
+
+**Алгоритмы и их тесты**
+
+- ```hello.asm``` - [hello_asm.yml](https://github.com/ivandemidov04/ak-lab-3/blob/main/golden/hello_asm.yml)
+- ```cat.asm``` - [cat_asm.yml](https://github.com/ivandemidov04/ak-lab-3/blob/main/golden/cat_asm.yml)
+- ```hello_username.asm``` - [hello_user_name_asm.yml](https://github.com/ivandemidov04/ak-lab-3/blob/main/golden/hello_username_asm.yml)
+- ```prob2.asm``` - [prob2_asm.yml](https://github.com/ivandemidov04/ak-lab-3/blob/main/golden/prob2_asm.yml)
+
+## Аналитика алгоритмов
+
+```
+| ФИО | <алг> | <LoC> | <code инстр.> | <инстр.> | <такт.> | <вариант> |
+| Демидов И.А. | hello | 26 | 10 | 60 | 139 | (asm | acc | harv | hw | instr | struct | stream | port | cstr | prob2) |
+| Демидов И.А. | cat | 34 | 18 | 40 | 98 | (asm | acc | harv | hw | instr | struct | stream | port | cstr | prob2) |
+| Демидов И.А. | hello_username | 50 | 21 | 152 | 354 | (asm | acc | instr | hw | instr | struct | stream | port | cstr | prob2) |
+```
